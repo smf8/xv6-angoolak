@@ -89,3 +89,9 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int sys_getparentid(void) {
+    // access parent process
+    struct proc * currproc = myproc();
+    return currproc->parent->pid;
+}
