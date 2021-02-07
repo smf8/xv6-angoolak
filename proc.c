@@ -244,9 +244,9 @@ exit(void)
   }
 
   // Free syscall history linked list
-  while (p->syscallhistory != 0) {
-    syscallcounter * temp = p->syscallhistory;
-    p->syscallhistory = p->syscallhistory->next;
+  while (curproc->syscallhistory != 0) {
+    syscallcounter * temp = curproc->syscallhistory;
+    curproc->syscallhistory = curproc->syscallhistory->next;
     kfree((char *)temp);
   }
 
