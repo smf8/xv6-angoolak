@@ -88,6 +88,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->syscallhistory = 0;
 
   release(&ptable.lock);
 
@@ -242,7 +243,15 @@ exit(void)
     }
   }
 
-  begin_op();
+  // Free syscall history linked list
+  while (p->syscallhistory != 0) {
+    syscallcounter * temp = p->syscallhistory;
+    p->syscallhistory = p->syscallhistory->next;
+    kfree((char *)temp);
+  }
+
+
+    begin_op();
   iput(curproc->cwd);
   end_op();
   curproc->cwd = 0;
@@ -488,6 +497,13 @@ kill(int pid)
       // Wake process from sleep if necessary.
       if(p->state == SLEEPING)
         p->state = RUNNABLE;
+
+      while (p->syscallhistory != 0) {
+        syscallcounter * temp = p->syscallhistory;
+        p->syscallhistory = p->syscallhistory->next;
+        kfree((char *)temp);
+      }
+
       release(&ptable.lock);
       return 0;
     }
@@ -553,3 +569,19 @@ int getchildren(){
     return resultchilds;
 }
 
+int getsyscallcounter(int num){
+    struct proc * currproc = myproc();
+
+    if (currproc == 0)
+        return -1;
+
+    syscallcounter * temp = currproc->syscallhistory;
+    while (temp->next != 0 && temp->num != num)
+        temp = temp->next;
+
+    if (temp->num == num){
+        return temp->count;
+    }
+
+    return 0;
+}

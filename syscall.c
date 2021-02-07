@@ -105,7 +105,7 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_getparentid(void);
 extern int sys_getchildren(void);
-
+extern int sys_getsyscallcounter(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -131,7 +131,42 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_getparentid] sys_getparentid,
 [SYS_getchildren] sys_getchildren,
+[SYS_getsyscallcounter] sys_getsyscallcounter,
 };
+
+syscallcounter * newcounter(int num) {
+    syscallcounter * counter = (syscallcounter *) kalloc();
+    if (counter == 0)
+        return 0;
+
+    counter->num = num;
+    counter->count = 1;
+    counter->next = 0;
+
+    return counter;
+}
+
+void updatesyscallhistory(int num) {
+    struct proc * currproc = myproc();
+    if (currproc == 0)
+        return;
+
+    if (currproc->syscallhistory == 0) {
+        currproc->syscallhistory = newcounter(num);
+        return;
+    }
+
+    syscallcounter * temp = currproc->syscallhistory;
+    while (temp->next != 0 && temp->num != num)
+        temp = temp->next;
+
+    if (temp->num == num){
+        temp->count++;
+        return;
+    }
+
+    temp->next = newcounter(num);
+}
 
 void
 syscall(void)
@@ -141,6 +176,7 @@ syscall(void)
 
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+    updatesyscallhistory(num);
     curproc->tf->eax = syscalls[num]();
   } else {
     cprintf("%d %s: unknown sys call %d\n",
