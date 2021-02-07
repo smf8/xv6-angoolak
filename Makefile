@@ -183,6 +183,7 @@ UPROGS=\
 	_zombie\
 	_getParentIDTest\
 	_getChildrenTest\
+	_getSyscallCounterTest\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -255,7 +256,7 @@ EXTRA=\
 	printf.c umalloc.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
-	getParentIDTest.c getChildrenTest.c
+	getParentIDTest.c getChildrenTest.c getSyscallCounterTest.c
 
 dist:
 	rm -rf dist
