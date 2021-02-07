@@ -17,13 +17,14 @@ int main(){
             printf(1, "child2 (%d) parent id: %d\n", getpid(), getparentid());
         }else{
             wait();
-            return 0;
+            exit();
         }
 
     }else{
         wait();
         for (int i = 1; i <= 24; ++i)
             printf(1, "system call counter at the end %d: %d\n", i, getsyscallcounter(i));
-        return 0;
+        exit();
     }
+    exit();
 }
