@@ -95,3 +95,7 @@ int sys_getparentid(void) {
     struct proc * currproc = myproc();
     return currproc->parent->pid;
 }
+
+int sys_getchildren(void){
+    return getchildren();
+}

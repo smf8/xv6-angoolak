@@ -532,3 +532,24 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int getchildren(){
+    struct proc * currproc = myproc();
+
+    int resultchilds = 0;
+    struct proc *p;
+    acquire(&ptable.lock);
+    cprintf("looking for childs of %d...\n", currproc->pid);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if(p->parent->pid == currproc->pid){
+            //found a child
+            cprintf("found child %d\n", p->pid);
+            resultchilds *=100;
+            resultchilds += p->pid;
+        }
+    }
+    release(&ptable.lock);
+
+    return resultchilds;
+}
+

@@ -24,6 +24,8 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int getparentid(void);
+int getchildren(void);
+
 
 
 // ulib.c
