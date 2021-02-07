@@ -13,6 +13,11 @@ struct cpu {
 extern struct cpu cpus[NCPU];
 extern int ncpu;
 
+#define POLICY_DEFAULT 0
+#define POLICY_ROUND_ROBIN 1
+#define POLICY_PRIORITY 2 // process with higher priority runs first
+
+
 //PAGEBREAK: 17
 // Saved registers for kernel context switches.
 // Don't need to save all the segment registers (%cs, etc),
@@ -42,6 +47,7 @@ typedef struct syscallcounter {
 
 // Per-process state
 struct proc {
+  int priority;                 // priority value for scheduling
   uint sz;                     // Size of process memory (bytes)
   pde_t* pgdir;                // Page table
   char *kstack;                // Bottom of kernel stack for this process

@@ -12,6 +12,8 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+int policy = POLICY_PRIORITY;
+
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -38,10 +40,10 @@ struct cpu*
 mycpu(void)
 {
   int apicid, i;
-  
+
   if(readeflags()&FL_IF)
     panic("mycpu called with interrupts enabled\n");
-  
+
   apicid = lapicid();
   // APIC IDs are not guaranteed to be contiguous. Maybe we should have
   // a reverse map, or reserve a register to store &cpus[i].
@@ -87,6 +89,7 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
+  p->priority = 10;
   p->pid = nextpid++;
   p->syscallhistory = 0;
 
@@ -125,7 +128,7 @@ userinit(void)
   extern char _binary_initcode_start[], _binary_initcode_size[];
 
   p = allocproc();
-  
+
   initproc = p;
   if((p->pgdir = setupkvm()) == 0)
     panic("userinit: out of memory?");
@@ -284,7 +287,7 @@ wait(void)
   struct proc *p;
   int havekids, pid;
   struct proc *curproc = myproc();
-  
+
   acquire(&ptable.lock);
   for(;;){
     // Scan through table looking for exited children.
@@ -334,31 +337,47 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
-  
+
   for(;;){
     // Enable interrupts on this processor.
     sti();
 
-    // Loop over process table looking for process to run.
+    struct proc * max_pri = 0;
+      // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
+      // finding process with maximum priority
+      if(policy == POLICY_PRIORITY) {
+          max_pri = p;
+          for (struct proc *p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++) {
+              if (p1->state != RUNNABLE)
+                  continue;
+              if (p1->priority > max_pri->priority) {
+                  max_pri = p;
+              }
+          }
+          p = max_pri;
+//          cprintf("selecting %d with priority %d\n", p->pid, p->priority);
+      }
+          // Switch to chosen process.  It is the process's job
+          // to release ptable.lock and then reacquire it
+          // before jumping back to us.
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
-    }
+          c->proc = p;
+          switchuvm(p);
+          p->state = RUNNING;
+
+          swtch(&(c->scheduler), p->context);
+          switchkvm();
+
+          // Process is done running for now.
+          // It should have changed its p->state before coming back.
+          c->proc = 0;
+      }
     release(&ptable.lock);
 
   }
@@ -376,6 +395,7 @@ sched(void)
 {
   int intena;
   struct proc *p = myproc();
+
 
   if(!holding(&ptable.lock))
     panic("sched ptable.lock");
@@ -396,7 +416,7 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
-  sched();
+    sched();
   release(&ptable.lock);
 }
 
@@ -427,7 +447,7 @@ void
 sleep(void *chan, struct spinlock *lk)
 {
   struct proc *p = myproc();
-  
+
   if(p == 0)
     panic("sleep");
 
@@ -584,4 +604,22 @@ int getsyscallcounter(int num){
     }
 
     return 0;
+}
+
+int setPriority(int pid, int priority){
+    struct proc *p;
+
+    int result = -1;
+
+    acquire(&ptable.lock);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if(p->pid == pid){
+            p->priority = priority;
+            result = pid;
+            break;
+        }
+    }
+    release(&ptable.lock);
+
+    return result;
 }

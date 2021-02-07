@@ -108,3 +108,18 @@ int sys_getsyscallcounter(void){
 
     return getsyscallcounter(num);
 }
+
+int sys_setpriority(void){
+    int pid;
+    int priority;
+
+    if(argint(0, &pid) < 0 || argint(1, &priority) < 0)
+        return -1;
+
+    if(pid < 0 || pid > NPROC)
+        return -1;
+    if(priority < 0 || priority > MAXPRIORITY)
+        return -1;
+
+    return setPriority(pid, priority);
+}

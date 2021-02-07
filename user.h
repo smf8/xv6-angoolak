@@ -26,6 +26,7 @@ int uptime(void);
 int getparentid(void);
 int getchildren(void);
 int getsyscallcounter(int);
+int setpriority(int, int);
 
 
 

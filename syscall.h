@@ -23,3 +23,4 @@
 #define SYS_getparentid 22
 #define SYS_getchildren 23
 #define SYS_getsyscallcounter 24
+#define SYS_setpriority 25
