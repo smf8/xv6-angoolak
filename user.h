@@ -54,6 +54,8 @@ int setpriority(int, int);
 
 int changepolicy(int);
 
+int getinfo(int, info *);
+
 
 // ulib.c
 int stat(const char *, struct stat *);

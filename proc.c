@@ -655,3 +655,26 @@ int changepolicy(int p) {
 
     return policy = p;
 }
+
+int getinfo(int pid, info *pinfo) {
+    struct proc *p;
+
+    int result = -1;
+
+    acquire(&ptable.lock);
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->pid == pid) {
+            pinfo->sleep_time = p->sleep_time;
+            pinfo->ready_time = p->ready_time;
+            pinfo->running_time = p->running_time;
+            pinfo->termination_time = p->creation_time;
+            pinfo->termination_time = p->termination_time;
+
+            result = pid;
+            break;
+        }
+    }
+    release(&ptable.lock);
+
+    return result;
+}

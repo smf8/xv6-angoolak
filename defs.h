@@ -196,6 +196,8 @@ extern int policy;
 
 int changepolicy(int);
 
+int getinfo(int, info *);
+
 // swtch.S
 void swtch(struct context **, struct context *);
 

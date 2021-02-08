@@ -47,6 +47,14 @@ typedef struct syscallcounter {
     struct syscallcounter *next;
 } syscallcounter;
 
+typedef struct {
+    long long creation_time;        // time in which the process created
+    long long running_time;         // total time in which the process is running
+    long long ready_time;           // total time in which the process is ready
+    long long sleep_time;           // total time in which the process is sleeping
+    long long termination_time;     // time in which the process terminated
+} info;
+
 // Per-process state
 struct proc {
     uint sz;                        // Size of process memory (bytes)
