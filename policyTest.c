@@ -30,10 +30,10 @@ void testRoundRobin() {
 
     for (int i = 0; i < PROC; ++i) {
         pid = fork();
-        if (pid == 0) {
-            pids[i] = getpid();
+        if (pid == 0)
             break;
-        }
+        else
+            pids[i] = pid;
     }
 
     if (pid == 0) {
@@ -108,9 +108,10 @@ void testPrioritySched() {
         pid = fork();
         if (pid == 0) {
             index = i;
-            pids[i] = getpid();
             setpriority(pids[i], 6);
             break;
+        } else {
+            pids[i] = pid;
         }
     }
 
@@ -119,9 +120,10 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                pids[i] = getpid();
                 setpriority(pids[i], 5);
                 break;
+            } else {
+                pids[i] = pid;
             }
         }
 
@@ -130,9 +132,10 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                pids[i] = getpid();
                 setpriority(pids[i], 4);
                 break;
+            } else {
+                pids[i] = pid;
             }
         }
 
@@ -141,9 +144,10 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                pids[i] = getpid();
                 setpriority(pids[i], 3);
                 break;
+            } else {
+                pids[i] = pid;
             }
         }
 
@@ -152,9 +156,10 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                pids[i] = getpid();
                 setpriority(pids[i], 2);
                 break;
+            } else {
+                pids[i] = pid;
             }
         }
 
@@ -163,9 +168,10 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                pids[i] = getpid();
                 setpriority(pids[i], 1);
                 break;
+            } else {
+                pids[i] = pid;
             }
         }
 

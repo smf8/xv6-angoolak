@@ -60,6 +60,8 @@ typedef struct info{
     long long termination_time;     // time in which the process terminated
 } info;
 
+struct info infos[NPROC];
+
 struct sum {
     long long tat;
     long long w;
