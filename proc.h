@@ -47,7 +47,7 @@ typedef struct syscallcounter {
     struct syscallcounter *next;
 } syscallcounter;
 
-typedef struct {
+typedef struct info{
     long long creation_time;        // time in which the process created
     long long running_time;         // total time in which the process is running
     long long ready_time;           // total time in which the process is ready

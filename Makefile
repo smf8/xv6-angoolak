@@ -186,6 +186,7 @@ UPROGS=\
 	_getSyscallCounterTest\
 	_syscallCounterTest\
 	_roundrobinTest\
+	_policyTest\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -260,7 +261,7 @@ EXTRA=\
 	.gdbinit.tmpl gdbutil\
 	getParentIDTest.c getChildrenTest.c\
 	getSyscallCounterTest.c syscallCounterTest.c\
-	roundrobinTest.c\
+	roundrobinTest.c policyTest.c\
 
 dist:
 	rm -rf dist

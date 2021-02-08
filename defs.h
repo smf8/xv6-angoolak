@@ -198,6 +198,8 @@ int changepolicy(int);
 
 int getinfo(int, info *);
 
+extern struct spinlock calculationlock;
+
 // swtch.S
 void swtch(struct context **, struct context *);
 
