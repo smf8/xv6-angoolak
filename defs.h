@@ -200,7 +200,10 @@ int changepolicy(int);
 int getinfo(int, struct info *);
 
 extern struct spinlock calculationlock;
+
 int getinfo(int, struct info *);
+
+sum increment(struct info*, sum *);
 
 struct proc *findPriority(int);
 

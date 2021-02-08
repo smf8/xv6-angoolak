@@ -821,3 +821,11 @@ int setqueue(int pid, int queue){
 
     return result;
 }
+
+void increment(struct info* pinfo, sum * suminfo){
+    acquire(&calculationlock);
+    suminfo.cbt += pinfo->running_time;
+    suminfo.w += pinfo->ready_time;
+    suminfo.tat += turnAroundTime;
+    release(&calculationlock);
+}

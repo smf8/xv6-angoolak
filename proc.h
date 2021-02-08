@@ -60,6 +60,12 @@ typedef struct info{
     long long termination_time;     // time in which the process terminated
 } info;
 
+typedef struct {
+    long long tat;
+    long long w;
+    long long cbt;
+} sum;
+
 // Per-process state
 struct proc {
     uint sz;                        // Size of process memory (bytes)

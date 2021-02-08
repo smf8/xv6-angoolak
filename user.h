@@ -58,6 +58,7 @@ int getinfo(int, char *);
 
 int setqueue(int, int);
 
+sum increment(struct info*, sum *);
 
 // ulib.c
 int stat(const char *, struct stat *);
