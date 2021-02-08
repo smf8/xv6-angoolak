@@ -161,8 +161,8 @@ int sys_increment(void) {
     struct info *pinfo;
     long long *tat;
 
-    if (argptr(2, (void *) &tat, sizeof(*tat)) < 0 || argptr(1, (void *) &suminfo, sizeof(*suminfo)) ||
-        argptr(0, (void *) &pinfo, sizeof(*pinfo)))
+    if (argptr(0, (void *) &pinfo, sizeof(*pinfo)) || argptr(1, (void *) &suminfo, sizeof(*suminfo)) ||
+        argptr(2, (void *) &tat, sizeof(*tat)) < 0)
         return -1;
 
     increment(pinfo, suminfo, tat);

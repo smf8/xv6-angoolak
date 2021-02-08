@@ -286,6 +286,13 @@ exit(void) {
     if (curproc == initproc)
         panic("init exiting");
 
+    if (curproc->state==RUNNING)
+        curproc->running_time += ticks - curproc->last_time;
+    else if (curproc->state==RUNNABLE)
+        curproc->ready_time += ticks - curproc->last_time;
+    else if (curproc->state==SLEEPING)
+        curproc->sleep_time += ticks - curproc->last_time;
+    curproc->last_time = ticks;
     curproc->termination_time = ticks;
 
     // Close all open files.
@@ -402,7 +409,9 @@ scheduler(void) {
 
                 c->proc = selectedP;
                 switchuvm(selectedP);
+                selectedP->ready_time += ticks - selectedP->last_time;
                 selectedP->state = RUNNING;
+                selectedP->last_time = ticks;
                 selectedP->scheduled_times++;
 
                 swtch(&(c->scheduler), selectedP->context);
@@ -447,7 +456,9 @@ scheduler(void) {
 
                         c->proc = selectedP;
                         switchuvm(selectedP);
+                        selectedP->ready_time += ticks - selectedP->last_time;
                         selectedP->state = RUNNING;
+                        selectedP->last_time = ticks;
                         selectedP->scheduled_times++;
 
                         swtch(&(c->scheduler), selectedP->context);
@@ -461,7 +472,9 @@ scheduler(void) {
 
                     c->proc = p;
                     switchuvm(p);
+                    p->ready_time += ticks - p->last_time;
                     p->state = RUNNING;
+                    p->last_time = ticks;
                     p->scheduled_times++;
 
                     swtch(&(c->scheduler), p->context);
@@ -581,6 +594,13 @@ sleep(void *chan, struct spinlock *lk) {
     }
     // Go to sleep.
     p->chan = chan;
+
+    if (p->state==RUNNING)
+        p->running_time += ticks - p->last_time;
+    else if (p->state==RUNNABLE)
+        p->ready_time += ticks - p->last_time;
+    p->last_time = ticks;
+
     p->state = SLEEPING;
 
     sched();
@@ -628,11 +648,14 @@ kill(int pid) {
     acquire(&ptable.lock);
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
-            p->termination_time = ticks;
             p->killed = 1;
+
             // Wake process from sleep if necessary.
-            if (p->state == SLEEPING)
+            if (p->state == SLEEPING) {
                 p->state = RUNNABLE;
+                p->sleep_time += ticks - p->last_time;
+            }
+            p->last_time = ticks;
 
             while (p->syscallhistory != 0) {
                 syscallcounter *temp = p->syscallhistory;
@@ -794,7 +817,7 @@ int getinfo(int pid, struct info *pinfo) {
             pinfo->sleep_time = p->sleep_time;
             pinfo->ready_time = p->ready_time;
             pinfo->running_time = p->running_time;
-            pinfo->termination_time = p->creation_time;
+            pinfo->creation_time = p->creation_time;
             pinfo->termination_time = p->termination_time;
 
             result = pid;
