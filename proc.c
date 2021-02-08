@@ -23,6 +23,7 @@ int lastQueue[NCPU];
 
 struct queue schedulingQueues[4];
 
+struct spinlock calculationlock;
 
 int policy = POLICY_MLQ;
 
@@ -822,10 +823,10 @@ int setqueue(int pid, int queue){
     return result;
 }
 
-void increment(struct info* pinfo, sum * suminfo){
+void increment(struct info* pinfo, struct sum * suminfo, long long tat){
     acquire(&calculationlock);
-    suminfo.cbt += pinfo->running_time;
-    suminfo.w += pinfo->ready_time;
-    suminfo.tat += turnAroundTime;
+    suminfo->cbt += pinfo->running_time;
+    suminfo->w += pinfo->ready_time;
+    suminfo->tat += tat;
     release(&calculationlock);
 }

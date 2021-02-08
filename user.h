@@ -1,5 +1,7 @@
 struct stat;
 struct rtcdate;
+struct info;
+struct sum;
 
 // system calls
 int fork(void);
@@ -54,11 +56,11 @@ int setpriority(int, int);
 
 int changepolicy(int);
 
-int getinfo(int, char *);
+int getinfo(int, struct info *);
 
 int setqueue(int, int);
 
-sum increment(struct info*, sum *);
+void increment(struct info*, struct sum *, long long);
 
 // ulib.c
 int stat(const char *, struct stat *);

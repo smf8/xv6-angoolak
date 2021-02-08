@@ -10,6 +10,7 @@ struct sleeplock;
 struct stat;
 struct superblock;
 struct info;
+struct sum;
 
 // bio.c
 void binit(void);
@@ -197,17 +198,15 @@ extern int policy;
 
 int changepolicy(int);
 
-int getinfo(int, struct info *);
-
 extern struct spinlock calculationlock;
 
 int getinfo(int, struct info *);
 
-sum increment(struct info*, sum *);
+void increment(struct info *, struct sum *, long long);
 
 struct proc *findPriority(int);
 
-int setqueue(int,int);
+int setqueue(int, int);
 
 // swtch.S
 void swtch(struct context **, struct context *);

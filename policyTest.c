@@ -2,13 +2,13 @@
 #include "stat.h"
 #include "user.h"
 
-typedef struct {
+typedef struct sum {
     long long tat;
     long long w;
     long long cbt;
 } sum;
 
-typedef struct {
+typedef struct info {
     long long creation_time;        // time in which the process created
     long long running_time;         // total time in which the process is running
     long long ready_time;           // total time in which the process is ready
@@ -17,14 +17,15 @@ typedef struct {
 } info;
 
 void testRoundRobin() {
-    sum *suminfo = (sum *)malloc(sizeof(sum));
+    sum *suminfo = (sum *) malloc(sizeof(sum));
     suminfo->cbt = 0;
     suminfo->w = 0;
     suminfo->tat = 0;
 
     int pid;
     for (int i = 0; i < 10; ++i) {
-        if (pid = fork(), pid == 0)
+        pid = fork();
+        if (pid == 0)
             break;
     }
 
@@ -34,22 +35,22 @@ void testRoundRobin() {
         }
     } else {
         wait();
-        printf(1, "avg) turn around time:%lld\nwaiting time: %lld\nCBT: %lld", suminfo->tat / 10,
-               suminfo->w / 10, suminfo->cbt / 10);
+//        double tat = suminfo->tat / 10, w = suminfo->w / 10, cbt = suminfo->cbt / 10;
+        printf(1, "avg) turn around time:%lf\nwaiting time: %lf\nCBT: %lf", suminfo->tat, suminfo->w, suminfo->cbt);
         exit();
     }
 
     info *pinfo = (info *) malloc(sizeof(info));
-    if (getinfo(pid, info) != -1) {
+    if (getinfo(pid, pinfo) != -1) {
         long long turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
         printf(1, "%d) turn around time:%lld, waiting time: %lld, CBT: %lld", getpid(), turnAroundTime,
                pinfo->ready_time, pinfo->running_time);
 
-        increment(pinfo, suminfo);
+        increment(pinfo, suminfo, turnAroundTime);
     }
 
-    exit()
+    exit();
 }
 
 int main(int argc, char *argv[]) {

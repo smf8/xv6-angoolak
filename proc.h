@@ -60,11 +60,11 @@ typedef struct info{
     long long termination_time;     // time in which the process terminated
 } info;
 
-typedef struct {
+struct sum {
     long long tat;
     long long w;
     long long cbt;
-} sum;
+};
 
 // Per-process state
 struct proc {
