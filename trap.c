@@ -103,7 +103,7 @@ trap(struct trapframe *tf) {
         if (policy != POLICY_DEFAULT &&  policy == POLICY_MLQ) {
             if(myproc()->queueNumber == QUEUE_PRIORITY_RR) {
                 yield();
-            }else (ticks % QUANTUM == 0) {
+            }else if(ticks % QUANTUM == 0) {
                 yield();
             }
         } else {
