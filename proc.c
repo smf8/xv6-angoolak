@@ -821,7 +821,7 @@ int setPriority(int pid, int priority) {
 }
 
 int changepolicy(int p) {
-    if (p < 0 || p > 2)
+    if (p < 0 || p > 3)
         return -1;
 
     return policy = p;
@@ -862,10 +862,10 @@ int setqueue(int pid, int queue) {
     return result;
 }
 
-void increment(struct info *pinfo, struct sum *suminfo, long long *tat) {
+void increment(struct info *pinfo, struct sum *suminfo, int *tat) {
     acquire(&calculationlock);
     suminfo->cbt += pinfo->running_time;
-    suminfo->w += pinfo->ready_time;
+    suminfo->w += pinfo->sleep_time;
     suminfo->tat += *tat;
     release(&calculationlock);
 }

@@ -53,19 +53,19 @@ typedef struct syscallcounter {
 } syscallcounter;
 
 typedef struct info{
-    long long creation_time;        // time in which the process created
-    long long running_time;         // total time in which the process is running
-    long long ready_time;           // total time in which the process is ready
-    long long sleep_time;           // total time in which the process is sleeping
-    long long termination_time;     // time in which the process terminated
+    int creation_time;        // time in which the process created
+    int running_time;         // total time in which the process is running
+    int ready_time;           // total time in which the process is ready
+    int sleep_time;           // total time in which the process is sleeping
+    int termination_time;     // time in which the process terminated
 } info;
 
 struct info infos[NPROC];
 
 struct sum {
-    long long tat;
-    long long w;
-    long long cbt;
+    int tat;
+    int w;
+    int cbt;
 };
 
 // Per-process state
@@ -86,13 +86,13 @@ struct proc {
     syscallcounter *syscallhistory; // history of called syscalls
     int priority;                   // priority value for scheduling
     int queueNumber;
-    long long scheduled_times;      // number of times this process was scheduled
-    long long creation_time;        // time in which the process created
-    long long running_time;         // total time in which the process is running
-    long long ready_time;           // total time in which the process is ready
-    long long sleep_time;           // total time in which the process is sleeping
-    long long termination_time;     // time in which the process terminated
-    long long last_time;
+    int scheduled_times;      // number of times this process was scheduled
+    int creation_time;        // time in which the process created
+    int running_time;         // total time in which the process is running
+    int ready_time;           // total time in which the process is ready
+    int sleep_time;           // total time in which the process is sleeping
+    int termination_time;     // time in which the process terminated
+    int last_time;
 };
 
 // Process memory is laid out contiguously, low addresses first:
