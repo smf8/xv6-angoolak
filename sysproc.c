@@ -119,7 +119,7 @@ int sys_setpriority(void) {
     return setPriority(pid, priority);
 }
 
-int sys_setqueue(void){
+int sys_setqueue(void) {
     int pid;
     int queue;
 
@@ -132,4 +132,39 @@ int sys_setqueue(void){
         return -1;
 
     return setqueue(pid, queue);
+}
+
+int sys_changepolicy(void) {
+    int policy;
+
+    if (argint(0, &policy) < 0)
+        return -1;
+
+    return changepolicy(policy);
+}
+
+int sys_getinfo(void) {
+    int pid;
+    struct info *pinfo;
+
+    if (argint(0, &pid) < 0 || argptr(1, (void *) &pinfo, sizeof(*pinfo)))
+        return -1;
+
+    if (pid < 0 || pid > NPROC)
+        return -1;
+
+    return getinfo(pid, pinfo);
+}
+
+int sys_increment(void) {
+    struct sum *suminfo;
+    struct info *pinfo;
+    long long *tat;
+
+    if (argptr(0, (void *) &pinfo, sizeof(*pinfo)) || argptr(1, (void *) &suminfo, sizeof(*suminfo)) ||
+        argptr(2, (void *) &tat, sizeof(*tat)) < 0)
+        return -1;
+
+    increment(pinfo, suminfo, tat);
+    return 0;
 }

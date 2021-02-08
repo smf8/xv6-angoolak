@@ -13,16 +13,17 @@ struct {
 } ptable;
 
 
-struct queue{
+struct queue {
     int front, rear, size;
     struct spinlock lock;
-    struct proc* array[NPROC];
+    struct proc *array[NPROC];
 };
 
 int lastQueue[NCPU];
 
 struct queue schedulingQueues[4];
 
+struct spinlock calculationlock;
 
 int policy = POLICY_MLQ;
 
@@ -155,19 +156,19 @@ userinit(void) {
 
 
     schedulingQueues[0].front = 0;
-    schedulingQueues[0].rear = NPROC-1;
+    schedulingQueues[0].rear = NPROC - 1;
     schedulingQueues[0].size = 0;
 
     schedulingQueues[1].front = 0;
-    schedulingQueues[1].rear = NPROC-1;
+    schedulingQueues[1].rear = NPROC - 1;
     schedulingQueues[1].size = 0;
 
     schedulingQueues[2].front = 0;
-    schedulingQueues[2].rear = NPROC-1;
+    schedulingQueues[2].rear = NPROC - 1;
     schedulingQueues[2].size = 0;
 
     schedulingQueues[3].front = 0;
-    schedulingQueues[3].rear = NPROC-1;
+    schedulingQueues[3].rear = NPROC - 1;
     schedulingQueues[3].size = 0;
 
     for (int i = 0; i < NPROC; i++) {
@@ -285,6 +286,13 @@ exit(void) {
     if (curproc == initproc)
         panic("init exiting");
 
+    if (curproc->state==RUNNING)
+        curproc->running_time += ticks - curproc->last_time;
+    else if (curproc->state==RUNNABLE)
+        curproc->ready_time += ticks - curproc->last_time;
+    else if (curproc->state==SLEEPING)
+        curproc->sleep_time += ticks - curproc->last_time;
+    curproc->last_time = ticks;
     curproc->termination_time = ticks;
 
     // Close all open files.
@@ -307,7 +315,6 @@ exit(void) {
     iput(curproc->cwd);
     end_op();
     curproc->cwd = 0;
-
 
 
     acquire(&ptable.lock);
@@ -402,7 +409,9 @@ scheduler(void) {
 
                 c->proc = selectedP;
                 switchuvm(selectedP);
+                selectedP->ready_time += ticks - selectedP->last_time;
                 selectedP->state = RUNNING;
+                selectedP->last_time = ticks;
                 selectedP->scheduled_times++;
 
                 swtch(&(c->scheduler), selectedP->context);
@@ -410,7 +419,7 @@ scheduler(void) {
 
                 c->proc = 0;
             }
-        } else if(policy == POLICY_MLQ){
+        } else if (policy == POLICY_MLQ) {
 //            cprintf("cpu %d last queue : %d\n", cpuid(), lastQueue[cpuid()]);
             p = 0;
             for (int i = 1; i <= 4; i++) {
@@ -447,7 +456,9 @@ scheduler(void) {
 
                         c->proc = selectedP;
                         switchuvm(selectedP);
+                        selectedP->ready_time += ticks - selectedP->last_time;
                         selectedP->state = RUNNING;
+                        selectedP->last_time = ticks;
                         selectedP->scheduled_times++;
 
                         swtch(&(c->scheduler), selectedP->context);
@@ -461,7 +472,9 @@ scheduler(void) {
 
                     c->proc = p;
                     switchuvm(p);
+                    p->ready_time += ticks - p->last_time;
                     p->state = RUNNING;
+                    p->last_time = ticks;
                     p->scheduled_times++;
 
                     swtch(&(c->scheduler), p->context);
@@ -470,7 +483,7 @@ scheduler(void) {
                     c->proc = 0;
                 }
             }
-        } else{
+        } else {
             // Loop over process table looking for process to run.
             for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
                 if (p->state != RUNNABLE)
@@ -581,6 +594,13 @@ sleep(void *chan, struct spinlock *lk) {
     }
     // Go to sleep.
     p->chan = chan;
+
+    if (p->state==RUNNING)
+        p->running_time += ticks - p->last_time;
+    else if (p->state==RUNNABLE)
+        p->ready_time += ticks - p->last_time;
+    p->last_time = ticks;
+
     p->state = SLEEPING;
 
     sched();
@@ -628,11 +648,14 @@ kill(int pid) {
     acquire(&ptable.lock);
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
-            p->termination_time = ticks;
             p->killed = 1;
+
             // Wake process from sleep if necessary.
-            if (p->state == SLEEPING)
+            if (p->state == SLEEPING) {
                 p->state = RUNNABLE;
+                p->sleep_time += ticks - p->last_time;
+            }
+            p->last_time = ticks;
 
             while (p->syscallhistory != 0) {
                 syscallcounter *temp = p->syscallhistory;
@@ -722,7 +745,7 @@ int getsyscallcounter(int num) {
 }
 
 // mode = 1 : less priority value = higher priority
-struct proc *findPriority(int mode){
+struct proc *findPriority(int mode) {
     struct proc *p;
     struct proc *selectedP = 0;
 
@@ -733,12 +756,12 @@ struct proc *findPriority(int mode){
             selectedP = p;
         }
 
-        if(mode == 1){
+        if (mode == 1) {
             if (selectedP->priority > p->priority) {
                 selectedP = p;
             }
 
-        }else{
+        } else {
             if (selectedP->priority < p->priority) {
                 selectedP = p;
             }
@@ -794,7 +817,7 @@ int getinfo(int pid, struct info *pinfo) {
             pinfo->sleep_time = p->sleep_time;
             pinfo->ready_time = p->ready_time;
             pinfo->running_time = p->running_time;
-            pinfo->termination_time = p->creation_time;
+            pinfo->creation_time = p->creation_time;
             pinfo->termination_time = p->termination_time;
 
             result = pid;
@@ -806,7 +829,7 @@ int getinfo(int pid, struct info *pinfo) {
     return result;
 }
 
-int setqueue(int pid, int queue){
+int setqueue(int pid, int queue) {
     struct proc *p;
 
     int result = -1;
@@ -820,4 +843,12 @@ int setqueue(int pid, int queue){
     release(&ptable.lock);
 
     return result;
+}
+
+void increment(struct info *pinfo, struct sum *suminfo, long long *tat) {
+    acquire(&calculationlock);
+    suminfo->cbt += pinfo->running_time;
+    suminfo->w += pinfo->ready_time;
+    suminfo->tat += *tat;
+    release(&calculationlock);
 }

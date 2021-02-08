@@ -27,3 +27,4 @@
 #define SYS_changepolicy 26
 #define SYS_getinfo 27
 #define SYS_setqueue 28
+#define SYS_increment 29
