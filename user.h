@@ -54,7 +54,7 @@ int setpriority(int, int);
 
 int changepolicy(int);
 
-int getinfo(int, info *);
+int getinfo(int, char *);
 
 
 // ulib.c

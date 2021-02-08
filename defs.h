@@ -9,6 +9,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct info;
 
 // bio.c
 void binit(void);
@@ -196,7 +197,7 @@ extern int policy;
 
 int changepolicy(int);
 
-int getinfo(int, info *);
+int getinfo(int, struct info *);
 
 extern struct spinlock calculationlock;
 
