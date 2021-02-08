@@ -2,7 +2,7 @@
 #include "stat.h"
 #include "user.h"
 
-int main(){
+int main() {
     int pid = getpid();
 
     fork();
@@ -10,18 +10,18 @@ int main(){
     fork();
     fork();
 
-    if(getpid() != pid){
+    if (getpid() != pid) {
         sleep(1000);
     }
     //only check for parent;
-    if(getpid() == pid){
+    if (getpid() == pid) {
         printf(1, "parent ID: %d\nchilds: ", getpid());
         int children = getchildren();
-        for(int j = children; j > 0; j /=100){
-            int childID = j%100;
+        for (int j = children; j > 0; j /= 100) {
+            int childID = j % 100;
             printf(1, "%d ", childID);
         }
-        printf(1,"\n");
+        printf(1, "\n");
     }
     exit();
 }
