@@ -647,3 +647,10 @@ int setPriority(int pid, int priority){
 
     return result;
 }
+
+int changepolicy(int p){
+    if (p<0 || p>2)
+        return -1;
+
+    return policy = p;
+}

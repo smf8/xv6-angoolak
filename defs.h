@@ -123,7 +123,8 @@ void            yield(void);
 int             getchildren(void);
 int             getsyscallcounter(int);
 int             setPriority(int,int);
-extern int policy;
+extern int      policy;
+int             changepolicy(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
