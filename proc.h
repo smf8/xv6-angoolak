@@ -47,7 +47,6 @@ typedef struct syscallcounter {
 
 // Per-process state
 struct proc {
-  int priority;                 // priority value for scheduling
   uint sz;                     // Size of process memory (bytes)
   pde_t* pgdir;                // Page table
   char *kstack;                // Bottom of kernel stack for this process
@@ -62,6 +61,8 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   syscallcounter *syscallhistory;
+  int priority;                 // priority value for scheduling
+  long long scheduled_times;    // number of times this process was scheduled
 };
 
 // Process memory is laid out contiguously, low addresses first:

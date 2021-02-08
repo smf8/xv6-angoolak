@@ -89,7 +89,8 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
-  p->priority = 10;
+  p->priority = 3;
+  p->scheduled_times = 0;
   p->pid = nextpid++;
   p->syscallhistory = 0;
 
@@ -342,42 +343,61 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
-    struct proc * max_pri = 0;
-      // Loop over process table looking for process to run.
+
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
 
+    if(policy == POLICY_PRIORITY){
+        struct proc* selectedP = 0;
+        for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+            if (p->state != RUNNABLE)
+                continue;
+            if(selectedP == 0){
+                selectedP = p;
+            }
 
-      // finding process with maximum priority
-      if(policy == POLICY_PRIORITY) {
-          max_pri = p;
-          for (struct proc *p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++) {
-              if (p1->state != RUNNABLE)
-                  continue;
-              if (p1->priority > max_pri->priority) {
-                  max_pri = p;
-              }
-          }
-          p = max_pri;
-//          cprintf("selecting %d with priority %d\n", p->pid, p->priority);
-      }
-          // Switch to chosen process.  It is the process's job
-          // to release ptable.lock and then reacquire it
-          // before jumping back to us.
+            if(selectedP->priority > p->priority){
+                selectedP = p;
+            }
 
-          c->proc = p;
-          switchuvm(p);
-          p->state = RUNNING;
+            // this trick is to find a process with same priority but less scheduled
+            if(selectedP->priority == p->priority && selectedP->scheduled_times > p->scheduled_times){
+                selectedP = p;
+            }
+        }
+        if(selectedP != 0) {
+            cprintf("process %d selected with priority %d\n", selectedP->pid, selectedP->priority);
 
-          swtch(&(c->scheduler), p->context);
-          switchkvm();
+            c->proc = selectedP;
+            switchuvm(selectedP);
+            selectedP->state = RUNNING;
+            selectedP->scheduled_times++;
 
-          // Process is done running for now.
-          // It should have changed its p->state before coming back.
-          c->proc = 0;
-      }
+            swtch(&(c->scheduler), selectedP->context);
+            switchkvm();
+
+            c->proc = 0;
+        }
+    }else{
+        // Loop over process table looking for process to run.
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+            if(p->state != RUNNABLE)
+                continue;
+            // Switch to chosen process.  It is the process's job
+            // to release ptable.lock and then reacquire it
+            // before jumping back to us.
+
+            c->proc = p;
+            switchuvm(p);
+            p->state = RUNNING;
+
+            swtch(&(c->scheduler), p->context);
+            switchkvm();
+
+            // Process is done running for now.
+            // It should have changed its p->state before coming back.
+            c->proc = 0;
+        }
+    }
     release(&ptable.lock);
 
   }
@@ -614,6 +634,10 @@ int setPriority(int pid, int priority){
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if(p->pid == pid){
+            if(p->priority != priority){
+                p->scheduled_times = 0;
+            }
+
             p->priority = priority;
             result = pid;
             break;

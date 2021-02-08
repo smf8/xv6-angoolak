@@ -55,14 +55,14 @@ int testPriority(){
 
     int parentID = getpid(), child1ID,child2ID;
 
-    int err = setpriority(parentID, 50);
+    int err = setpriority(parentID, 4);
     if(err == -1){
         printf(1, "failed to set parent priority\n");
     }
 
     if(fork() == 0){
         child1ID = getpid();
-        int err = setpriority(child1ID, 10);
+        int err = setpriority(child1ID, 1);
         if(err == -1){
             printf(1, "failed to set child1 priority\n");
         }
@@ -75,7 +75,7 @@ int testPriority(){
     }else {
         if (fork() == 0) {
             child2ID = getpid();
-            int err = setpriority(child2ID, 20);
+            int err = setpriority(child2ID, 4);
             if (err == -1) {
                 printf(1, "failed to set child2 priority\n");
             }

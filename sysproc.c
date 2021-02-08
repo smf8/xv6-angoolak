@@ -118,8 +118,11 @@ int sys_setpriority(void){
 
     if(pid < 0 || pid > NPROC)
         return -1;
-    if(priority < 0 || priority > MAXPRIORITY)
+    if(priority < 1)
         return -1;
+
+    if(priority > 6)
+        priority = 5;
 
     return setPriority(pid, priority);
 }
