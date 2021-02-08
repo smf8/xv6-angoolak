@@ -3,8 +3,8 @@
 #include "user.h"
 
 
-int doShit(long long n) {
-    int j = 0;
+long long doShit(long long n) {
+    int j = 1;
     for (int i = 0; i < n; ++i) {
         j += i * j + j % 23;
     }
@@ -102,6 +102,47 @@ int testPriority() {
     exit();
 }
 
+int testMLQ(){
+
+    int parentID = getpid();
+    int pids[20];
+    for (int i = 0; i <20 ; i++) {
+        if(getpid() == parentID){
+            pids[i] = fork();
+        }else{
+            int pid = getpid();
+            if(pid % 6 == 0){
+                setqueue(pid, 1);
+                setpriority(pid, (pid/6)+1);
+            }else if(pid % 5 == 0){
+                setqueue(pid, 2);
+                setpriority(pid, (pid/5)+1);
+            }
+
+            int j = 1;
+            for (int i = 0; i < 500000000; ++i) {
+                j += i * j + j % 23;
+            }
+
+            printf(1, "child[%d] finished it's shit = \n", pid, j);
+            break;
+        }
+    }
+
+
+    if(getpid() == parentID) {
+        for (int i = 0; i < 20; ++i) {
+            wait();
+        }
+
+        for (int i = 0; i < 20; i++) {
+            printf(1, "child[%d] : %d\n", i, pids[i]);
+        }
+    }
+    exit();
+    return 0;
+}
+
 int main() {
-    testPriority();
+    testMLQ();
 }
