@@ -13,10 +13,10 @@ struct {
 } ptable;
 
 
-struct queue{
+struct queue {
     int front, rear, size;
     struct spinlock lock;
-    struct proc* array[NPROC];
+    struct proc *array[NPROC];
 };
 
 int lastQueue[NCPU];
@@ -156,19 +156,19 @@ userinit(void) {
 
 
     schedulingQueues[0].front = 0;
-    schedulingQueues[0].rear = NPROC-1;
+    schedulingQueues[0].rear = NPROC - 1;
     schedulingQueues[0].size = 0;
 
     schedulingQueues[1].front = 0;
-    schedulingQueues[1].rear = NPROC-1;
+    schedulingQueues[1].rear = NPROC - 1;
     schedulingQueues[1].size = 0;
 
     schedulingQueues[2].front = 0;
-    schedulingQueues[2].rear = NPROC-1;
+    schedulingQueues[2].rear = NPROC - 1;
     schedulingQueues[2].size = 0;
 
     schedulingQueues[3].front = 0;
-    schedulingQueues[3].rear = NPROC-1;
+    schedulingQueues[3].rear = NPROC - 1;
     schedulingQueues[3].size = 0;
 
     for (int i = 0; i < NPROC; i++) {
@@ -310,7 +310,6 @@ exit(void) {
     curproc->cwd = 0;
 
 
-
     acquire(&ptable.lock);
 
     // Parent might be sleeping in wait().
@@ -411,7 +410,7 @@ scheduler(void) {
 
                 c->proc = 0;
             }
-        } else if(policy == POLICY_MLQ){
+        } else if (policy == POLICY_MLQ) {
 //            cprintf("cpu %d last queue : %d\n", cpuid(), lastQueue[cpuid()]);
             p = 0;
             for (int i = 1; i <= 4; i++) {
@@ -471,7 +470,7 @@ scheduler(void) {
                     c->proc = 0;
                 }
             }
-        } else{
+        } else {
             // Loop over process table looking for process to run.
             for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
                 if (p->state != RUNNABLE)
@@ -723,7 +722,7 @@ int getsyscallcounter(int num) {
 }
 
 // mode = 1 : less priority value = higher priority
-struct proc *findPriority(int mode){
+struct proc *findPriority(int mode) {
     struct proc *p;
     struct proc *selectedP = 0;
 
@@ -734,12 +733,12 @@ struct proc *findPriority(int mode){
             selectedP = p;
         }
 
-        if(mode == 1){
+        if (mode == 1) {
             if (selectedP->priority > p->priority) {
                 selectedP = p;
             }
 
-        }else{
+        } else {
             if (selectedP->priority < p->priority) {
                 selectedP = p;
             }
@@ -807,7 +806,7 @@ int getinfo(int pid, struct info *pinfo) {
     return result;
 }
 
-int setqueue(int pid, int queue){
+int setqueue(int pid, int queue) {
     struct proc *p;
 
     int result = -1;
@@ -823,10 +822,10 @@ int setqueue(int pid, int queue){
     return result;
 }
 
-void increment(struct info* pinfo, struct sum * suminfo, long long tat){
+void increment(struct info *pinfo, struct sum *suminfo, long long *tat) {
     acquire(&calculationlock);
     suminfo->cbt += pinfo->running_time;
     suminfo->w += pinfo->ready_time;
-    suminfo->tat += tat;
+    suminfo->tat += *tat;
     release(&calculationlock);
 }

@@ -23,7 +23,7 @@ void testRoundRobin() {
     suminfo->tat = 0;
 
     int pid;
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 3; ++i) {
         pid = fork();
         if (pid == 0)
             break;
@@ -31,7 +31,7 @@ void testRoundRobin() {
 
     if (pid == 0) {
         for (int i = 0; i < 1000; ++i) {
-            printf(1, "/%d/: %d", getpid(), i + 1);
+            printf(1, "%d: %d", getpid(), i + 1);
         }
     } else {
         wait();
@@ -42,9 +42,10 @@ void testRoundRobin() {
 
     info *pinfo = (info *) malloc(sizeof(info));
     if (getinfo(pid, pinfo) != -1) {
-        long long turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+        long long *turnAroundTime = (long long *) malloc(sizeof(long long));
+        *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
-        printf(1, "%d) turn around time:%lld, waiting time: %lld, CBT: %lld", getpid(), turnAroundTime,
+        printf(1, "%d) turn around time:%lld, waiting time: %lld, CBT: %lld\n", getpid(), *turnAroundTime,
                pinfo->ready_time, pinfo->running_time);
 
         increment(pinfo, suminfo, turnAroundTime);
