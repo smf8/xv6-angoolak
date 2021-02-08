@@ -111,7 +111,7 @@ allocproc(void) {
     schedulingQueues[0].size++;
     release(&schedulingQueues[0].lock);
 
-    cprintf("allocating shit %d = %d\n", schedulingQueues[0].rear, schedulingQueues[0].array[schedulingQueues[0].rear]);
+//    cprintf("allocating shit %d = %d\n", schedulingQueues[0].rear, schedulingQueues[0].array[schedulingQueues[0].rear]);
 
     p->pid = nextpid++;
     p->syscallhistory = 0;
@@ -156,19 +156,19 @@ userinit(void) {
 
 
     schedulingQueues[0].front = 0;
-    schedulingQueues[0].rear = NPROC - 1;
+    schedulingQueues[0].rear = NPROC-1;
     schedulingQueues[0].size = 0;
 
     schedulingQueues[1].front = 0;
-    schedulingQueues[1].rear = NPROC - 1;
+    schedulingQueues[1].rear = NPROC-1;
     schedulingQueues[1].size = 0;
 
     schedulingQueues[2].front = 0;
-    schedulingQueues[2].rear = NPROC - 1;
+    schedulingQueues[2].rear = NPROC-1;
     schedulingQueues[2].size = 0;
 
     schedulingQueues[3].front = 0;
-    schedulingQueues[3].rear = NPROC - 1;
+    schedulingQueues[3].rear = NPROC-1;
     schedulingQueues[3].size = 0;
 
     for (int i = 0; i < NPROC; i++) {
@@ -286,13 +286,6 @@ exit(void) {
     if (curproc == initproc)
         panic("init exiting");
 
-    if (curproc->state==RUNNING)
-        curproc->running_time += ticks - curproc->last_time;
-    else if (curproc->state==RUNNABLE)
-        curproc->ready_time += ticks - curproc->last_time;
-    else if (curproc->state==SLEEPING)
-        curproc->sleep_time += ticks - curproc->last_time;
-    curproc->last_time = ticks;
     curproc->termination_time = ticks;
 
     // Close all open files.
@@ -315,6 +308,7 @@ exit(void) {
     iput(curproc->cwd);
     end_op();
     curproc->cwd = 0;
+
 
 
     acquire(&ptable.lock);
@@ -403,7 +397,7 @@ scheduler(void) {
 
         if (policy == POLICY_PRIORITY) {
             struct proc *selectedP = 0;
-            selectedP = findPriority(1);
+            selectedP = findPriority(3);
             if (selectedP != 0) {
                 cprintf("process %d selected with priority %d\n", selectedP->pid, selectedP->priority);
 
@@ -429,13 +423,10 @@ scheduler(void) {
                 }
 
                 if (newQueue == QUEUE_DEFAULT || newQueue == QUEUE_PRIORITY_RR) {
-//                    for (int i = 0; i < NPROC; i++) {
-//                        cprintf("queue[%d] : %d\n", i, schedulingQueues[newQueue].array[i]);
-//                    }
                     for (;;) {
                         p = schedulingQueues[newQueue].array[schedulingQueues[newQueue].front];
                         schedulingQueues[newQueue].front = (schedulingQueues[newQueue].front + 1) % NPROC;
-                        if (p->state == UNUSED || p->state == ZOMBIE) {
+                        if (p->state == UNUSED || p->state == ZOMBIE || ( p->queueNumber != QUEUE_DEFAULT && p->queueNumber != QUEUE_PRIORITY_RR )) {
                             schedulingQueues[newQueue].size--;
                             continue;
                         } else {
@@ -449,10 +440,10 @@ scheduler(void) {
                     if (newQueue == QUEUE_PRIORITY)
                         selectedP = findPriority(1);
                     else
-                        selectedP = findPriority(0);
+                        selectedP = findPriority(2);
 
                     if (selectedP != 0) {
-                        cprintf("process %d selected with priority %d\n", selectedP->pid, selectedP->priority);
+//                        cprintf("process %d selected with priority %d\n", selectedP->pid, selectedP->priority);
 
                         c->proc = selectedP;
                         switchuvm(selectedP);
@@ -468,7 +459,7 @@ scheduler(void) {
                     }
                 }
                 if (p != 0 && p->state == RUNNABLE) {
-                    cprintf("running process %d from queue[%d]\n", p->pid, newQueue);
+//                    cprintf("running process %d from queue[%d]\n", p->pid, newQueue);
 
                     c->proc = p;
                     switchuvm(p);
@@ -744,31 +735,46 @@ int getsyscallcounter(int num) {
     return 0;
 }
 
+
 // mode = 1 : less priority value = higher priority
-struct proc *findPriority(int mode) {
+struct proc *findPriority(int mode){
     struct proc *p;
     struct proc *selectedP = 0;
 
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->state != RUNNABLE)
             continue;
-        if (selectedP == 0) {
-            selectedP = p;
-        }
 
-        if (mode == 1) {
+        // mode 1 = MLQ less value = higher
+        if(mode == 1 && p->queueNumber == QUEUE_PRIORITY){
+            if (selectedP == 0) {
+                selectedP = p;
+            }
+
             if (selectedP->priority > p->priority) {
                 selectedP = p;
             }
+            // mode 2 = MLQ more value = higher
+        }else if(mode == 2 && p->queueNumber == QUEUE_PRIORITY_REVERSE){
+            if (selectedP == 0) {
+                selectedP = p;
+            }
 
-        } else {
             if (selectedP->priority < p->priority) {
                 selectedP = p;
             }
-        }
+        }else if(mode == 3){
+            if (selectedP == 0) {
+                selectedP = p;
+            }
+
+            if (selectedP->priority < p->priority) {
+                selectedP = p;
+            }
+        };
 
         // this trick is to find a process with same priority but less scheduled
-        if (selectedP->priority == p->priority && selectedP->scheduled_times > p->scheduled_times) {
+        if (selectedP != 0 && selectedP->priority == p->priority && selectedP->scheduled_times > p->scheduled_times) {
             selectedP = p;
         }
     }
@@ -791,6 +797,15 @@ int setPriority(int pid, int priority) {
 
             p->priority = priority;
             result = pid;
+
+            if(p->queueNumber != QUEUE_DEFAULT || p->queueNumber != QUEUE_PRIORITY_RR){
+
+                acquire(&schedulingQueues[QUEUE_PRIORITY].lock);
+                schedulingQueues[QUEUE_PRIORITY].size++;
+                release(&schedulingQueues[QUEUE_PRIORITY].lock);
+
+            }
+
             break;
         }
     }
@@ -817,7 +832,7 @@ int getinfo(int pid, struct info *pinfo) {
             pinfo->sleep_time = p->sleep_time;
             pinfo->ready_time = p->ready_time;
             pinfo->running_time = p->running_time;
-            pinfo->creation_time = p->creation_time;
+            pinfo->termination_time = p->creation_time;
             pinfo->termination_time = p->termination_time;
 
             result = pid;
@@ -829,7 +844,7 @@ int getinfo(int pid, struct info *pinfo) {
     return result;
 }
 
-int setqueue(int pid, int queue) {
+int setqueue(int pid, int queue){
     struct proc *p;
 
     int result = -1;
@@ -837,6 +852,13 @@ int setqueue(int pid, int queue) {
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
             p->queueNumber = queue;
+
+            acquire(&schedulingQueues[queue].lock);
+            schedulingQueues[queue].rear = (schedulingQueues[queue].rear + 1) % NPROC;
+            schedulingQueues[queue].array[schedulingQueues[queue].rear] = p;
+            schedulingQueues[queue].size++;
+            release(&schedulingQueues[queue].lock);
+
             result = pid;
         }
     }

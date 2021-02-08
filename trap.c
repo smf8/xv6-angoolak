@@ -100,8 +100,10 @@ trap(struct trapframe *tf) {
     // If interrupts were on while locks held, would need to check nlock.
     if (myproc() && myproc()->state == RUNNING &&
         tf->trapno == T_IRQ0 + IRQ_TIMER) {
-        if (policy != POLICY_DEFAULT) {
-            if (ticks % QUANTUM == 0) {
+        if (policy != POLICY_DEFAULT &&  policy == POLICY_MLQ) {
+            if(myproc()->queueNumber == QUEUE_PRIORITY_RR) {
+                yield();
+            }else (ticks % QUANTUM == 0) {
                 yield();
             }
         } else {
