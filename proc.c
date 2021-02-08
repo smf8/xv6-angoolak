@@ -399,7 +399,7 @@ scheduler(void) {
             struct proc *selectedP = 0;
             selectedP = findPriority(3);
             if (selectedP != 0) {
-                cprintf("process %d selected with priority %d\n", selectedP->pid, selectedP->priority);
+//                cprintf("process %d selected with priority %d\n", selectedP->pid, selectedP->priority);
 
                 c->proc = selectedP;
                 switchuvm(selectedP);
