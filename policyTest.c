@@ -51,8 +51,9 @@ void testRoundRobin() {
                 long long *turnAroundTime = (long long *) malloc(sizeof(long long));
                 *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
-                printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], *turnAroundTime,
-                       pinfo->ready_time, pinfo->running_time);
+                printf(1, "%d) turn around time:%d", pids[i]);
+                printf(1, " CBT: %d,", pinfo->running_time);
+                printf(1, " waiting time: %d\n", pinfo->ready_time);
 
                 increment(pinfo, suminfo, turnAroundTime);
             }
