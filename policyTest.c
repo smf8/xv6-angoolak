@@ -2,6 +2,9 @@
 #include "stat.h"
 #include "user.h"
 
+#define PROC 10
+#define LOOP 1000
+
 typedef struct sum {
     long long tat;
     long long w;
@@ -23,34 +26,40 @@ void testRoundRobin() {
     suminfo->tat = 0;
 
     int pid;
-    for (int i = 0; i < 10; ++i) {
+    int pids[PROC];
+
+    for (int i = 0; i < PROC; ++i) {
         pid = fork();
-        if (pid == 0)
+        if (pid == 0) {
+            pids[i] = getpid();
             break;
+        }
     }
 
     if (pid == 0) {
-        for (int i = 0; i < 1000; ++i) {
+        for (int i = 0; i < LOOP; ++i) {
             printf(1, "/%d/: /%d/\n", getpid(), i + 1);
         }
     } else {
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < PROC; ++i) {
             wait();
+        }
+
+        for (int i = 0; i < PROC; ++i) {
+            info *pinfo = (info *) malloc(sizeof(info));
+            if (getinfo(pids[i], pinfo) != -1) {
+                long long *turnAroundTime = (long long *) malloc(sizeof(long long));
+                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+
+                printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], *turnAroundTime,
+                       pinfo->ready_time, pinfo->running_time);
+
+                increment(pinfo, suminfo, turnAroundTime);
+            }
+
         }
 //        double tat = suminfo->tat / 10, w = suminfo->w / 10, cbt = suminfo->cbt / 10;
         printf(1, "\navg) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo->tat, suminfo->w, suminfo->cbt);
-        exit();
-    }
-
-    info *pinfo = (info *) malloc(sizeof(info));
-    if (getinfo(pid, pinfo) != -1) {
-        long long *turnAroundTime = (long long *) malloc(sizeof(long long));
-        *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
-
-        printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", getpid(), *turnAroundTime,
-               pinfo->ready_time, pinfo->running_time);
-
-        increment(pinfo, suminfo, turnAroundTime);
     }
 
     exit();
