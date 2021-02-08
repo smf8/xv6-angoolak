@@ -55,7 +55,7 @@ int testPriority() {
 
     int parentID = getpid(), child1ID, child2ID;
 
-    int err = setpriority(parentID, 4);
+    int err = setpriority(parentID, 5);
     if (err == -1) {
         printf(1, "failed to set parent priority\n");
     }

@@ -16,7 +16,12 @@ extern int ncpu;
 #define POLICY_DEFAULT 0
 #define POLICY_ROUND_ROBIN 1
 #define POLICY_PRIORITY 2 // process with higher priority runs first
+#define POLICY_MLQ 3
 
+#define QUEUE_DEFAULT 0
+#define QUEUE_PRIORITY 1
+#define QUEUE_PRIORITY_REVERSE 2
+#define QUEUE_PRIORITY_RR 3
 
 //PAGEBREAK: 17
 // Saved registers for kernel context switches.
@@ -72,6 +77,7 @@ struct proc {
     char name[16];                  // Process name (debugging)
     syscallcounter *syscallhistory; // history of called syscalls
     int priority;                   // priority value for scheduling
+    int queueNumber;
     long long scheduled_times;      // number of times this process was scheduled
     long long creation_time;        // time in which the process created
     long long running_time;         // total time in which the process is running

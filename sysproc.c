@@ -118,3 +118,18 @@ int sys_setpriority(void) {
 
     return setPriority(pid, priority);
 }
+
+int sys_setqueue(void){
+    int pid;
+    int queue;
+
+    if (argint(0, &pid) < 0 || argint(1, &queue) < 0)
+        return -1;
+
+    if (pid < 0 || pid > NPROC)
+        return -1;
+    if (queue < 0)
+        return -1;
+
+    return setqueue(pid, queue);
+}

@@ -56,6 +56,8 @@ int changepolicy(int);
 
 int getinfo(int, char *);
 
+int setqueue(int, int);
+
 
 // ulib.c
 int stat(const char *, struct stat *);

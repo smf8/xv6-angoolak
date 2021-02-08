@@ -12,7 +12,19 @@ struct {
     struct proc proc[NPROC];
 } ptable;
 
-int policy = POLICY_PRIORITY;
+
+struct queue{
+    int front, rear, size;
+    struct spinlock lock;
+    struct proc* array[NPROC];
+};
+
+int lastQueue[NCPU];
+
+struct queue schedulingQueues[4];
+
+
+int policy = POLICY_MLQ;
 
 static struct proc *initproc;
 
@@ -90,6 +102,16 @@ allocproc(void) {
     p->state = EMBRYO;
     p->priority = 3;
     p->scheduled_times = 0;
+    p->queueNumber = QUEUE_DEFAULT;
+
+    acquire(&schedulingQueues[0].lock);
+    schedulingQueues[0].rear = (schedulingQueues[0].rear + 1) % NPROC;
+    schedulingQueues[0].array[schedulingQueues[0].rear] = p;
+    schedulingQueues[0].size++;
+    release(&schedulingQueues[0].lock);
+
+    cprintf("allocating shit %d = %d\n", schedulingQueues[0].rear, schedulingQueues[0].array[schedulingQueues[0].rear]);
+
     p->pid = nextpid++;
     p->syscallhistory = 0;
 
@@ -130,6 +152,30 @@ void
 userinit(void) {
     struct proc *p;
     extern char _binary_initcode_start[], _binary_initcode_size[];
+
+
+    schedulingQueues[0].front = 0;
+    schedulingQueues[0].rear = NPROC-1;
+    schedulingQueues[0].size = 0;
+
+    schedulingQueues[1].front = 0;
+    schedulingQueues[1].rear = NPROC-1;
+    schedulingQueues[1].size = 0;
+
+    schedulingQueues[2].front = 0;
+    schedulingQueues[2].rear = NPROC-1;
+    schedulingQueues[2].size = 0;
+
+    schedulingQueues[3].front = 0;
+    schedulingQueues[3].rear = NPROC-1;
+    schedulingQueues[3].size = 0;
+
+    for (int i = 0; i < NPROC; i++) {
+        schedulingQueues[0].array[i] = 0;
+        schedulingQueues[1].array[i] = 0;
+        schedulingQueues[2].array[i] = 0;
+        schedulingQueues[3].array[i] = 0;
+    }
 
     p = allocproc();
 
@@ -262,6 +308,8 @@ exit(void) {
     end_op();
     curproc->cwd = 0;
 
+
+
     acquire(&ptable.lock);
 
     // Parent might be sleeping in wait().
@@ -348,22 +396,7 @@ scheduler(void) {
 
         if (policy == POLICY_PRIORITY) {
             struct proc *selectedP = 0;
-            for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-                if (p->state != RUNNABLE)
-                    continue;
-                if (selectedP == 0) {
-                    selectedP = p;
-                }
-
-                if (selectedP->priority > p->priority) {
-                    selectedP = p;
-                }
-
-                // this trick is to find a process with same priority but less scheduled
-                if (selectedP->priority == p->priority && selectedP->scheduled_times > p->scheduled_times) {
-                    selectedP = p;
-                }
-            }
+            selectedP = findPriority(1);
             if (selectedP != 0) {
                 cprintf("process %d selected with priority %d\n", selectedP->pid, selectedP->priority);
 
@@ -377,7 +410,67 @@ scheduler(void) {
 
                 c->proc = 0;
             }
-        } else {
+        } else if(policy == POLICY_MLQ){
+//            cprintf("cpu %d last queue : %d\n", cpuid(), lastQueue[cpuid()]);
+            p = 0;
+            for (int i = 1; i <= 4; i++) {
+                int newQueue = (lastQueue[cpuid()] + i) % 4;
+                if (schedulingQueues[newQueue].size == 0) {
+                    continue;
+                }
+
+                if (newQueue == QUEUE_DEFAULT || newQueue == QUEUE_PRIORITY_RR) {
+//                    for (int i = 0; i < NPROC; i++) {
+//                        cprintf("queue[%d] : %d\n", i, schedulingQueues[newQueue].array[i]);
+//                    }
+                    for (;;) {
+                        p = schedulingQueues[newQueue].array[schedulingQueues[newQueue].front];
+                        schedulingQueues[newQueue].front = (schedulingQueues[newQueue].front + 1) % NPROC;
+                        if (p->state == UNUSED || p->state == ZOMBIE) {
+                            schedulingQueues[newQueue].size--;
+                            continue;
+                        } else {
+                            schedulingQueues[newQueue].rear = (schedulingQueues[newQueue].rear + 1) % NPROC;
+                            schedulingQueues[newQueue].array[schedulingQueues[newQueue].rear] = p;
+                            break;
+                        }
+                    }
+                } else {
+                    struct proc *selectedP = 0;
+                    if (newQueue == QUEUE_PRIORITY)
+                        selectedP = findPriority(1);
+                    else
+                        selectedP = findPriority(0);
+
+                    if (selectedP != 0) {
+                        cprintf("process %d selected with priority %d\n", selectedP->pid, selectedP->priority);
+
+                        c->proc = selectedP;
+                        switchuvm(selectedP);
+                        selectedP->state = RUNNING;
+                        selectedP->scheduled_times++;
+
+                        swtch(&(c->scheduler), selectedP->context);
+                        switchkvm();
+
+                        c->proc = 0;
+                    }
+                }
+                if (p != 0 && p->state == RUNNABLE) {
+                    cprintf("running process %d from queue[%d]\n", p->pid, newQueue);
+
+                    c->proc = p;
+                    switchuvm(p);
+                    p->state = RUNNING;
+                    p->scheduled_times++;
+
+                    swtch(&(c->scheduler), p->context);
+                    switchkvm();
+
+                    c->proc = 0;
+                }
+            }
+        } else{
             // Loop over process table looking for process to run.
             for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
                 if (p->state != RUNNABLE)
@@ -418,6 +511,7 @@ sched(void) {
     int intena;
     struct proc *p = myproc();
 
+    lastQueue[cpuid()] = p->queueNumber;
 
     if (!holding(&ptable.lock))
         panic("sched ptable.lock");
@@ -627,6 +721,39 @@ int getsyscallcounter(int num) {
     return 0;
 }
 
+// mode = 1 : less priority value = higher priority
+struct proc *findPriority(int mode){
+    struct proc *p;
+    struct proc *selectedP = 0;
+
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->state != RUNNABLE)
+            continue;
+        if (selectedP == 0) {
+            selectedP = p;
+        }
+
+        if(mode == 1){
+            if (selectedP->priority > p->priority) {
+                selectedP = p;
+            }
+
+        }else{
+            if (selectedP->priority < p->priority) {
+                selectedP = p;
+            }
+        }
+
+        // this trick is to find a process with same priority but less scheduled
+        if (selectedP->priority == p->priority && selectedP->scheduled_times > p->scheduled_times) {
+            selectedP = p;
+        }
+    }
+
+
+    return selectedP;
+}
+
 int setPriority(int pid, int priority) {
     struct proc *p;
 
@@ -656,7 +783,7 @@ int changepolicy(int p) {
     return policy = p;
 }
 
-int getinfo(int pid, info *pinfo) {
+int getinfo(int pid, struct info *pinfo) {
     struct proc *p;
 
     int result = -1;
@@ -672,6 +799,22 @@ int getinfo(int pid, info *pinfo) {
 
             result = pid;
             break;
+        }
+    }
+    release(&ptable.lock);
+
+    return result;
+}
+
+int setqueue(int pid, int queue){
+    struct proc *p;
+
+    int result = -1;
+    acquire(&ptable.lock);
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->pid == pid) {
+            p->queueNumber = queue;
+            result = pid;
         }
     }
     release(&ptable.lock);
