@@ -862,10 +862,10 @@ int setqueue(int pid, int queue) {
     return result;
 }
 
-void increment(struct info *pinfo, struct sum *suminfo, int *tat) {
+void increment(struct info *pinfo, struct sum *suminfo, int tat) {
     acquire(&calculationlock);
     suminfo->cbt += pinfo->running_time;
     suminfo->w += pinfo->sleep_time;
-    suminfo->tat += *tat;
+    suminfo->tat += tat;
     release(&calculationlock);
 }

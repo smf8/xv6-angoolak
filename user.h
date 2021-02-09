@@ -60,7 +60,7 @@ int getinfo(int, struct info *);
 
 int setqueue(int, int);
 
-void increment(struct info*, struct sum *, int *);
+void increment(struct info*, struct sum *, int);
 
 // ulib.c
 int stat(const char *, struct stat *);

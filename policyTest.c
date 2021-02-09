@@ -48,8 +48,7 @@ void testRoundRobin() {
         for (int i = 0; i < PROC; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 printf(1, "%d) turn around time: %d", pids[i]);
                 printf(1, " CBT: %d,", pinfo->running_time);
@@ -60,7 +59,8 @@ void testRoundRobin() {
 
         }
 //        double tat = suminfo->tat / 10, w = suminfo->w / 10, cbt = suminfo->cbt / 10;
-        printf(1, "\navg) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo->tat, suminfo->w, suminfo->cbt);
+        printf(1, "\navg) turn around time:%d\nwaiting time: %d\nCBT: %d\n", suminfo->tat / 10, suminfo->w / 10,
+               suminfo->cbt / 10);
     }
 
     exit();
@@ -188,10 +188,9 @@ void testPrioritySched() {
         for (int i = 0; i < 30; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
-                printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], *turnAroundTime,
+                printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], turnAroundTime,
                        pinfo->ready_time, pinfo->running_time);
 
                 increment(pinfo, suminfo, turnAroundTime);
@@ -201,8 +200,7 @@ void testPrioritySched() {
         for (int i = 0; i < 5; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo6, turnAroundTime);
             }
@@ -211,8 +209,7 @@ void testPrioritySched() {
         for (int i = 5; i < 10; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo5, turnAroundTime);
             }
@@ -221,8 +218,7 @@ void testPrioritySched() {
         for (int i = 10; i < 15; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo4, turnAroundTime);
             }
@@ -231,8 +227,7 @@ void testPrioritySched() {
         for (int i = 15; i < 20; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo3, turnAroundTime);
             }
@@ -241,8 +236,7 @@ void testPrioritySched() {
         for (int i = 20; i < 25; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo2, turnAroundTime);
             }
@@ -251,34 +245,33 @@ void testPrioritySched() {
         for (int i = 25; i < 30; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo1, turnAroundTime);
             }
         }
 
-        printf(1, "\n6) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo6->tat, suminfo6->w,
-               suminfo6->cbt);
+        printf(1, "\n6) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo6->tat / 5, suminfo6->w / 5,
+               suminfo6->cbt / 5);
 
-        printf(1, "\n5) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo5->tat, suminfo5->w,
-               suminfo5->cbt);
+        printf(1, "\n5) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo5->tat / 5, suminfo5->w / 5,
+               suminfo5->cbt / 5);
 
-        printf(1, "\n4) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo4->tat, suminfo4->w,
-               suminfo4->cbt);
+        printf(1, "\n4) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo4->tat / 5, suminfo4->w / 5,
+               suminfo4->cbt / 5);
 
-        printf(1, "\n3) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo3->tat, suminfo3->w,
-               suminfo3->cbt);
+        printf(1, "\n3) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo3->tat / 5, suminfo3->w / 5,
+               suminfo3->cbt / 5);
 
-        printf(1, "\n2) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo2->tat, suminfo2->w,
-               suminfo2->cbt);
+        printf(1, "\n2) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo2->tat / 5, suminfo2->w / 5,
+               suminfo2->cbt / 5);
 
-        printf(1, "\n1) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo1->tat, suminfo1->w,
-               suminfo1->cbt);
+        printf(1, "\n1) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo1->tat / 5, suminfo1->w / 5,
+               suminfo1->cbt / 5);
 
 //        double tat = suminfo->tat / 10, w = suminfo->w / 10, cbt = suminfo->cbt / 10;
-        printf(1, "\ntotal avg) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo->tat, suminfo->w,
-               suminfo->cbt);
+        printf(1, "\ntotal avg) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo->tat / 30, suminfo->w / 30,
+               suminfo->cbt / 30);
     }
 
     exit();
@@ -376,10 +369,9 @@ void testPriorityQueue() {
         for (int i = 0; i < 30; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
-                printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], *turnAroundTime,
+                printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], turnAroundTime,
                        pinfo->ready_time, pinfo->running_time);
 
                 increment(pinfo, suminfo, turnAroundTime);
@@ -389,8 +381,7 @@ void testPriorityQueue() {
         for (int i = 0; i < 5; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo1, turnAroundTime);
             }
@@ -399,8 +390,7 @@ void testPriorityQueue() {
         for (int i = 5; i < 10; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo2, turnAroundTime);
             }
@@ -409,8 +399,7 @@ void testPriorityQueue() {
         for (int i = 10; i < 15; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo3, turnAroundTime);
             }
@@ -419,28 +408,27 @@ void testPriorityQueue() {
         for (int i = 15; i < 20; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
-                int *turnAroundTime = (int *) malloc(sizeof(int));
-                *turnAroundTime = pinfo->termination_time - pinfo->creation_time;
+                int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 increment(pinfo, suminfo4, turnAroundTime);
             }
         }
 
-        printf(1, "\n1) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo1->tat, suminfo1->w,
-               suminfo1->cbt);
+        printf(1, "\n1) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo1->tat / 10, suminfo1->w / 10,
+               suminfo1->cbt / 10);
 
-        printf(1, "\n2) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo2->tat, suminfo2->w,
-               suminfo2->cbt);
+        printf(1, "\n2) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo2->tat / 10, suminfo2->w / 10,
+               suminfo2->cbt / 10);
 
-        printf(1, "\n3) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo3->tat, suminfo3->w,
-               suminfo3->cbt);
+        printf(1, "\n3) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo3->tat / 10, suminfo3->w / 10,
+               suminfo3->cbt / 10);
 
-        printf(1, "\n4) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo4->tat, suminfo4->w,
-               suminfo4->cbt);
+        printf(1, "\n4) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo4->tat / 10, suminfo4->w / 10,
+               suminfo4->cbt / 10);
 
 //        double tat = suminfo->tat / 10, w = suminfo->w / 10, cbt = suminfo->cbt / 10;
-        printf(1, "\ntotal avg) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo->tat, suminfo->w,
-               suminfo->cbt);
+        printf(1, "\ntotal avg) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo->tat / 40, suminfo->w / 40,
+               suminfo->cbt / 40);
     }
 
     exit();

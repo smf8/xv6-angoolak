@@ -202,7 +202,7 @@ extern struct spinlock calculationlock;
 
 int getinfo(int, struct info *);
 
-void increment(struct info *, struct sum *, int *);
+void increment(struct info *, struct sum *, int);
 
 struct proc *findPriority(int);
 

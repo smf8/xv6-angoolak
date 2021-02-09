@@ -159,10 +159,10 @@ int sys_getinfo(void) {
 int sys_increment(void) {
     struct sum *suminfo;
     struct info *pinfo;
-    int *tat;
+    int tat;
 
     if (argptr(0, (void *) &pinfo, sizeof(*pinfo)) || argptr(1, (void *) &suminfo, sizeof(*suminfo)) ||
-        argptr(2, (void *) &tat, sizeof(*tat)) < 0)
+        argint(2, &tat) < 0)
         return -1;
 
     increment(pinfo, suminfo, tat);
