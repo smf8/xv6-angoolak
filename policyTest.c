@@ -414,21 +414,28 @@ void testPriorityQueue() {
             }
         }
 
-        printf(1, "\n================DEFAULT_SCHEDULING================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo1->tat/10, suminfo1->w,
-               suminfo1->cbt/10);
+        printf(1,
+               "\n================DEFAULT_SCHEDULING================\nturn around time:%d\nwaiting time: %d\nCBT: %d",
+               suminfo1->tat / 10, suminfo1->w,
+               suminfo1->cbt / 10);
 
-        printf(1, "\n================PRIORITY_BASED================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo2->tat/10, suminfo2->w,
-               suminfo2->cbt/10);
+        printf(1, "\n================PRIORITY_BASED================\nturn around time:%d\nwaiting time: %d\nCBT: %d",
+               suminfo2->tat / 10, suminfo2->w,
+               suminfo2->cbt / 10);
 
-        printf(1, "\n================PRIORITY_BASED_REVERSE================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo3->tat/10, suminfo3->w,
-               suminfo3->cbt/10);
+        printf(1,
+               "\n================PRIORITY_BASED_REVERSE================\nturn around time:%d\nwaiting time: %d\nCBT: %d",
+               suminfo3->tat / 10, suminfo3->w,
+               suminfo3->cbt / 10);
 
-        printf(1, "\n================RR================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo4->tat/10, suminfo4->w,
-               suminfo4->cbt/10);
+        printf(1, "\n================RR================\nturn around time:%d\nwaiting time: %d\nCBT: %d",
+               suminfo4->tat / 10, suminfo4->w,
+               suminfo4->cbt / 10);
 
 //        double tat = suminfo->tat / 10, w = suminfo->w / 10, cbt = suminfo->cbt / 10;
-        printf(1, "\n================total avg================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo->tat/40, suminfo->w,
-               suminfo->cbt/40);
+        printf(1, "\n================total avg================\nturn around time:%d\nwaiting time: %d\nCBT: %d",
+               suminfo->tat / 40, suminfo->w,
+               suminfo->cbt / 40);
     }
 
     exit();
