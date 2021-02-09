@@ -197,7 +197,7 @@ void testPrioritySched() {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], turnAroundTime,
-                       pinfo->ready_time, pinfo->running_time);
+                       pinfo->sleep_time, pinfo->running_time);
 
                 increment(pinfo, suminfo, turnAroundTime);
             }
@@ -378,7 +378,7 @@ void testPriorityQueue() {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], turnAroundTime,
-                       pinfo->ready_time, pinfo->running_time);
+                       pinfo->sleep_time, pinfo->running_time);
 
                 increment(pinfo, suminfo, turnAroundTime);
             }
