@@ -2,7 +2,6 @@
 #include "stat.h"
 #include "user.h"
 
-
 long long doShit(long long n) {
     int j = 1;
     for (int i = 0; i < n; ++i) {
@@ -115,8 +114,7 @@ int testMLQ(){
                 setqueue(pid, 1);
                 setpriority(pid, (pid/6)+1);
             }else if(pid % 5 == 0){
-                setqueue(pid, 2);
-                setpriority(pid, (pid/5)+1);
+                setqueue(pid, 3);
             }
 
             int j = 1;
@@ -124,7 +122,7 @@ int testMLQ(){
                 j += i * j + j % 23;
             }
 
-            printf(1, "child[%d] finished it's shit = \n", pid, j);
+            printf(1, "child[%d] finished it's job = %d\n", pid, j);
             break;
         }
     }
@@ -140,7 +138,6 @@ int testMLQ(){
         }
     }
     exit();
-    return 0;
 }
 
 int main() {
