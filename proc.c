@@ -419,7 +419,6 @@ scheduler(void) {
                 c->proc = 0;
             }
         } else if (policy == POLICY_MLQ) {
-//            cprintf("cpu %d last queue : %d\n", cpuid(), lastQueue[cpuid()]);
             p = 0;
             for (int i = 1; i <= 4; i++) {
                 int newQueue = (lastQueue[cpuid()] + i) % 4;
@@ -429,6 +428,9 @@ scheduler(void) {
 
                 if (newQueue == QUEUE_DEFAULT || newQueue == QUEUE_PRIORITY_RR) {
                     for (;;) {
+                        if(schedulingQueues[newQueue].size == 0){
+                            break;
+                        }
                         p = schedulingQueues[newQueue].array[schedulingQueues[newQueue].front];
                         schedulingQueues[newQueue].front = (schedulingQueues[newQueue].front + 1) % NPROC;
                         if (p->state == UNUSED || p->state == ZOMBIE ||
@@ -833,7 +835,7 @@ int getinfo(int pid, struct info *pinfo) {
     pinfo->sleep_time = p.sleep_time;
     pinfo->ready_time = p.ready_time;
     pinfo->running_time = p.running_time;
-    pinfo->termination_time = p.creation_time;
+    pinfo->creation_time = p.creation_time;
     pinfo->termination_time = p.termination_time;
 
     return 0;

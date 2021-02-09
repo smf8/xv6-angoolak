@@ -102,7 +102,7 @@ void testPrioritySched() {
     suminfo6->w = 0;
     suminfo6->tat = 0;
 
-    int pid, index;
+    int pid, index = 0;
     int pids[30];
 
     for (int i = 0; i < 5; ++i) {
@@ -303,15 +303,13 @@ void testPriorityQueue() {
     suminfo4->w = 0;
     suminfo4->tat = 0;
 
-    int pid, index;
+    int pid;
     int pids[40];
 
     for (int i = 0; i < 10; ++i) {
         pid = fork();
         if (pid == 0) {
-            index = i;
-            setqueue(pids[i], 0);
-            setpriority(pids[i], (i % 6) + 1);
+//            index = i;
             break;
         } else {
             pids[i] = pid;
@@ -322,9 +320,10 @@ void testPriorityQueue() {
         for (int i = 10; i < 20; ++i) {
             pid = fork();
             if (pid == 0) {
-                index = i;
-                setqueue(pids[i], 1);
-                setpriority(pids[i], (i % 6) + 1);
+//                index = i;
+                int p = getpid();
+                setqueue(p, 1);
+                setpriority(p, (i % 6) + 1);
                 break;
             } else {
                 pids[i] = pid;
@@ -335,9 +334,10 @@ void testPriorityQueue() {
         for (int i = 20; i < 30; ++i) {
             pid = fork();
             if (pid == 0) {
-                index = i;
-                setqueue(pids[i], 2);
-                setpriority(pids[i], (i % 6) + 1);
+//                index = i;
+                int p = getpid();
+                setqueue(p, 2);
+                setpriority(p, (i % 6) + 1);
                 break;
             } else {
                 pids[i] = pid;
@@ -348,9 +348,9 @@ void testPriorityQueue() {
         for (int i = 30; i < 40; ++i) {
             pid = fork();
             if (pid == 0) {
-                index = i;
+//                index = i;
                 setqueue(pids[i], 3);
-                setpriority(pids[i], (i % 6) + 1);
+//                setpriority(pids[i], (i % 6) + 1);
                 break;
             } else {
                 pids[i] = pid;
@@ -359,14 +359,14 @@ void testPriorityQueue() {
 
     if (pid == 0) {
         for (int i = 0; i < 200; ++i) {
-            printf(1, "/%d/: /%d/\n", index + 1, i + 1);
+            printf(1, "/%d/: /%d/\n", 1, i + 1);
         }
     } else {
-        for (int i = 0; i < 30; ++i) {
+        for (int i = 0; i < 40; ++i) {
             wait();
         }
 
-        for (int i = 0; i < 30; ++i) {
+        for (int i = 0; i < 40; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
@@ -378,7 +378,7 @@ void testPriorityQueue() {
             }
         }
 
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 10; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
@@ -387,7 +387,7 @@ void testPriorityQueue() {
             }
         }
 
-        for (int i = 5; i < 10; ++i) {
+        for (int i = 10; i < 20; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
@@ -396,7 +396,7 @@ void testPriorityQueue() {
             }
         }
 
-        for (int i = 10; i < 15; ++i) {
+        for (int i = 20; i < 30; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
@@ -405,7 +405,7 @@ void testPriorityQueue() {
             }
         }
 
-        for (int i = 15; i < 20; ++i) {
+        for (int i = 30; i < 40; ++i) {
             info *pinfo = (info *) malloc(sizeof(info));
             if (getinfo(pids[i], pinfo) != -1) {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
@@ -414,21 +414,21 @@ void testPriorityQueue() {
             }
         }
 
-        printf(1, "\n1) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo1->tat / 10, suminfo1->w / 10,
-               suminfo1->cbt / 10);
+        printf(1, "\n================DEFAULT_SCHEDULING================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo1->tat/10, suminfo1->w,
+               suminfo1->cbt/10);
 
-        printf(1, "\n2) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo2->tat / 10, suminfo2->w / 10,
-               suminfo2->cbt / 10);
+        printf(1, "\n================PRIORITY_BASED================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo2->tat/10, suminfo2->w,
+               suminfo2->cbt/10);
 
-        printf(1, "\n3) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo3->tat / 10, suminfo3->w / 10,
-               suminfo3->cbt / 10);
+        printf(1, "\n================PRIORITY_BASED_REVERSE================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo3->tat/10, suminfo3->w,
+               suminfo3->cbt/10);
 
-        printf(1, "\n4) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo4->tat / 10, suminfo4->w / 10,
-               suminfo4->cbt / 10);
+        printf(1, "\n================RR================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo4->tat/10, suminfo4->w,
+               suminfo4->cbt/10);
 
 //        double tat = suminfo->tat / 10, w = suminfo->w / 10, cbt = suminfo->cbt / 10;
-        printf(1, "\ntotal avg) turn around time:%d\nwaiting time: %d\nCBT: %d", suminfo->tat / 40, suminfo->w / 40,
-               suminfo->cbt / 40);
+        printf(1, "\n================total avg================\nturn around time:%d\nwaiting time: %d\nCBT: %d", suminfo->tat/40, suminfo->w,
+               suminfo->cbt/40);
     }
 
     exit();
