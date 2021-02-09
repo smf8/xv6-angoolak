@@ -776,7 +776,7 @@ struct proc *findPriority(int mode) {
                 selectedP = p;
             }
 
-            if (selectedP->priority < p->priority) {
+            if (selectedP->priority > p->priority) {
                 selectedP = p;
             }
         };

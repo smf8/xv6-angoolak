@@ -50,9 +50,9 @@ void testRoundRobin() {
             if (getinfo(pids[i], pinfo) != -1) {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
-                printf(1, "%d) turn around time: %d", pids[i]);
-                printf(1, " CBT: %d,", pinfo->running_time);
-                printf(1, " waiting time: %d\n", pinfo->sleep_time);
+                printf(1, "%d) turn around time: %d", pids[i], turnAroundTime);
+                printf(1, " waiting time: %d ", pinfo->sleep_time);
+                printf(1, " CBT: %d\n", pinfo->running_time);
 
                 increment(pinfo, suminfo, turnAroundTime);
             }
@@ -109,7 +109,8 @@ void testPrioritySched() {
         pid = fork();
         if (pid == 0) {
             index = i;
-            setpriority(pids[i], 6);
+            int p = getpid();
+            setpriority(p, 6);
             break;
         } else {
             pids[i] = pid;
@@ -121,7 +122,8 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                setpriority(pids[i], 5);
+                int p = getpid();
+                setpriority(p, 5);
                 break;
             } else {
                 pids[i] = pid;
@@ -133,7 +135,8 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                setpriority(pids[i], 4);
+                int p = getpid();
+                setpriority(p, 4);
                 break;
             } else {
                 pids[i] = pid;
@@ -145,7 +148,8 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                setpriority(pids[i], 3);
+                int p = getpid();
+                setpriority(p, 3);
                 break;
             } else {
                 pids[i] = pid;
@@ -157,7 +161,8 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                setpriority(pids[i], 2);
+                int p = getpid();
+                setpriority(p, 2);
                 break;
             } else {
                 pids[i] = pid;
@@ -169,7 +174,8 @@ void testPrioritySched() {
             pid = fork();
             if (pid == 0) {
                 index = i;
-                setpriority(pids[i], 1);
+                int p = getpid();
+                setpriority(p, 1);
                 break;
             } else {
                 pids[i] = pid;
