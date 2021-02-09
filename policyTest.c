@@ -50,7 +50,7 @@ void testRoundRobin() {
             if (getinfo(pids[i], pinfo) != -1) {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
-                printf(1, "%d) turn around time: %d", pids[i]);
+                printf(1, "%d) turn around time: %d", turnAroundTime);
                 printf(1, " CBT: %d,", pinfo->running_time);
                 printf(1, " waiting time: %d\n", pinfo->sleep_time);
 
@@ -191,7 +191,7 @@ void testPrioritySched() {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], turnAroundTime,
-                       pinfo->ready_time, pinfo->running_time);
+                       pinfo->sleep_time, pinfo->running_time);
 
                 increment(pinfo, suminfo, turnAroundTime);
             }
@@ -372,7 +372,7 @@ void testPriorityQueue() {
                 int turnAroundTime = pinfo->termination_time - pinfo->creation_time;
 
                 printf(1, "%d) turn around time:%d, waiting time: %d, CBT: %d\n", pids[i], turnAroundTime,
-                       pinfo->ready_time, pinfo->running_time);
+                       pinfo->sleep_time, pinfo->running_time);
 
                 increment(pinfo, suminfo, turnAroundTime);
             }
